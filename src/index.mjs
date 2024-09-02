@@ -2,11 +2,14 @@
 import express from "express";
 
 const app = express();
+
+app.use(express.json()); // Returns middleware that only parses json and only looks at requests where the Content-Type header matches the type option.
+
 const PORT = process.env.PORT || 3000;
 
 const mockUsers = [
   { id: 1, name: "John Doe", email: "john@example.com" },
-  { id: 2, name: "Jane Doe", email: "jane@example.com" }, // Corrected email formatting
+  { id: 2, name: "Jane Doe", email: "jane@example.com" },
   { id: 3, name: "Bob Smith", email: "bob@example.com" },
   { id: 4, name: "Dwayne Smith", email: "dwayne@example.com" },
   { id: 5, name: "Jane Smith", email: "jane@example.com" },
@@ -21,8 +24,6 @@ app.get("/", (req, res) => {
 // Query Params
 // Get the usernames starting with a particular letter(s)
 app.get("/api/users", (req, res) => {
-  console.log("Query Parameters:", req.query);
-
   const { filter, value } = req.query;
 
   // Check if no query parameters are provided
@@ -47,6 +48,15 @@ app.get("/api/users", (req, res) => {
 
   // Default response
   return res.send(mockUsers);
+});
+
+// Post Requests
+// Create a new user
+app.post("/api/users", (req, res) => {
+  const { body } = req;
+  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
+  mockUsers.push(newUser);
+  return res.status(201).send(newUser);
 });
 
 // Request Params
