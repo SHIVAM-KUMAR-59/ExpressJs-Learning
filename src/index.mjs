@@ -125,6 +125,31 @@ app.patch("/api/users/:id", (req, res) => {
   return res.sendStatus(200);
 });
 
+// Delete Request to delete any user
+app.delete("/api/users/:id", (req, res) => {
+
+  const {
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) {
+    // Invalid Id Case
+    return res.status(400).send({ msg: "Invalid id" });
+  }
+
+  const findUserIndex = users.findIndex((user) => user.id === parsedId);
+
+  if (findUserIndex === -1) {
+    // User Not Fount Case
+    return res.status(404).send({ msg: "User Not Found" });
+  }
+
+  // Delete the user from the array
+  users.splice(findUserIndex);
+  return res.sendStatus(200);
+});
+
 // Listening on the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
