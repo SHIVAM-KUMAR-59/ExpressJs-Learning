@@ -25,6 +25,16 @@ const users = [
     name: "Pihu",
     email: "pihu@gmail.com",
   },
+  {
+    id: 5,
+    name: "Ritu",
+    email: "rituu@gmail.com",
+  },
+  {
+    id: 6,
+    name: "Lihu",
+    email: "lihu@gmail.com",
+  },
 ];
 
 // Products array
@@ -52,14 +62,24 @@ app.get("/", (req, res) => {
   res.status(200).send({ msg: "Hello World" });
 });
 
-// Get Requests for /api/users route ( Shows All Users )
+// Get Request and Query Params for /api/users route ( Shows All Users or Filtered Users )
 app.get("/api/users", (req, res) => {
-  res.status(200).send(users);
+  const {
+    query: { filter, value },
+  } = req;
+
+// When both filter and value is present, send filtered users
+if (filter && value) {
+    return res.send(users.filter((user) => user[filter].includes(value)));
+}
+
+// When only filter is present or even filter is not present, send all users
+return res.status(200).send(users);
 });
 
 // Get Requests for /api/products route ( Shows All Producsr )
 app.get("/api/products", (req, res) => {
-  res.status(200).send();
+  res.status(200).send(products);
 });
 
 // Route Parameters for users ( Shows users with the requested parameters )
