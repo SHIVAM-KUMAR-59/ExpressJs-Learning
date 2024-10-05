@@ -60,7 +60,7 @@ app.get("/api/users/:id", (req, res) => {
   res.status(200).send(user);
 });
 
-// Post Request to create a new user
+// Post Request to add a new user ( without validation )
 app.post("/api/users", (req, res) => {
   const newUser = {
     id: users[users.length - 1].id + 1,
@@ -75,6 +75,30 @@ app.post("/api/users", (req, res) => {
 // Get Requests for /api/products route (Shows All Products)
 app.get("/api/products", (req, res) => {
   res.status(200).send(products);
+});
+
+// Put Request to update the entire user, it changes all the properties of the user sent in the request body
+app.put("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  const parseId = parseInt(id);
+  if (isNaN(parseId)) {
+    // Invalid Id Case
+    return res.status(400).send({ msg: "Invalid id" });
+  }
+
+  const findUserIndex = users.findIndex((user) => user.id === parseId);
+
+  if (findUserIndex === -1) {
+    // User Not Found Case
+    return res.status(404).send({ msg: "User not found" });
+  }
+
+  users[findUserIndex] = { id: parseId, ...body };
+  return res.sendStatus(200);
 });
 
 // Listening on the server
