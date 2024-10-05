@@ -101,6 +101,30 @@ app.put("/api/users/:id", (req, res) => {
   return res.sendStatus(200);
 });
 
+// Patch Request to update a part of user which is sent in the requst body
+app.patch("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  const parseId = parseInt(id);
+  if (isNaN(parseId)) {
+    // Invalid Id Case
+    return res.status(400).send({ msg: "Invalid id" });
+  }
+
+  const findUserIndex = users.findIndex((user) => user.id === parseId);
+
+  if (findUserIndex === -1) {
+    // User Not Found Case
+    res.status(404).send({ msg: "User Not Found" });
+  }
+
+  users[findUserIndex] = { ...users[findUserIndex], ...body };
+  return res.sendStatus(200);
+});
+
 // Listening on the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
