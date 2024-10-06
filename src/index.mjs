@@ -1,4 +1,6 @@
 import express from "express"; // Importing express
+import { query, validationResult, body, matchedData, checkSchema, check } from "express-validator"
+import { createUserValidationSchema, getUserValidationSchema } from "./utils/validationSchemas.mjs";
 
 const app = express();
 
@@ -68,9 +70,16 @@ app.get(
   }
 );
 
-// Get Request and Query Params for /api/users route (Shows All Users or Filtered Users)
-app.get("/api/users", (req, res) => {
-  const { filter, value } = req.query;
+// Get Request and Query Params for /api/users route (Shows All Users or Filtered Users) validated using body() function from express-validator
+app.get("/api/users", checkSchema(getUserValidationSchema), (req, res) => {
+  const result = validationResult(req);
+
+  if (!result.isEmpty()) { // If there are errors, return the errors
+    return res.status(400).send({ errors: result.array() });
+  }
+
+  const data = matchedData(req);
+  const { filter, value } = data; // Destructure filter and value from data
 
   // Send filtered users when both filter and value are present
   if (filter && value) {
@@ -87,14 +96,16 @@ app.get("/api/users", (req, res) => {
 //     next();
 // });
 
-// Post Request to add a new user ( without validation )
-app.post("/api/users", (req, res) => {
-  const newUser = {
-    id: users[users.length - 1].id + 1,
-    name: req.body.name,
-    email: req.body.email,
-  };
+// Post Request to add a new user validated using body() function from express-validator
+app.post("/api/users", checkSchema(createUserValidationSchema) , (req, res) => {
+  const result = validationResult(req);
+  
+  if(!result.isEmpty()){ // If there are errors, return the errors
+    return res.status(400).send({ errors: result.array() });
+  }
 
+  const data = matchedData(req); // Extracts validated data from the request body
+  const newUser = { id:users[users.length - 1].id + 1, ...data };
   users.push(newUser);
   res.status(201).send(newUser);
 });
