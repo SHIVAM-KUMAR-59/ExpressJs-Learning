@@ -4,6 +4,34 @@ const app = express();
 
 app.use(express.json()); // Middleware to parse JSON body
 
+// Example middleware
+const loggingMiddleware = (req, res, next) => {
+  console.log(`${req.method} - ${req.url}`);
+  next();
+};
+
+// Middleware to reduce redundancy of code in put, patch and delete methods
+const resolveUserById = (req, res, next) => {
+  const {
+    params: { id },
+  } = req;
+
+  const parseId = parseInt(id);
+  if (isNaN(parseId)) {
+    // Invalid Id Case
+    return res.status(400).send({ msg: "Invalid id" });
+  }
+
+  const findUserIndex = users.findIndex((user) => user.id === parseId);
+
+  if (findUserIndex === -1) {
+    // User Not Found Case
+    return res.status(404).send({ msg: "User not found" });
+  }
+  req.findUserIndex = findUserIndex;
+  next();
+};
+
 const PORT = process.env.PORT || 3000; // Declaring the port
 
 // Users array
@@ -24,9 +52,21 @@ const products = [
 ];
 
 // Get Requests for home
-app.get("/", (req, res) => {
-  res.status(200).send({ msg: "Hello World" });
-});
+app.get(
+  "/",
+  (req, res, next) => {
+    console.log("Base URL 1");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Base URL 2");
+    next();
+  },
+  loggingMiddleware,
+  (req, res) => {
+    res.status(200).send({ msg: "Hello World" });
+  }
+);
 
 // Get Request and Query Params for /api/users route (Shows All Users or Filtered Users)
 app.get("/api/users", (req, res) => {
@@ -41,24 +81,11 @@ app.get("/api/users", (req, res) => {
   return res.status(200).send(users);
 });
 
-// Route Parameters for users (Shows a specific user by id)
-app.get("/api/users/:id", (req, res) => {
-  const id = req.params.id;
-  const parseId = parseInt(id);
-
-  // Handle invalid id
-  if (isNaN(parseId)) {
-    return res.status(400).send({ msg: "Invalid id" });
-  }
-
-  const user = users.find((user) => user.id === parseId);
-
-  if (!user) {
-    return res.status(404).send({ msg: "User not found" });
-  }
-
-  res.status(200).send(user);
-});
+// This middleware will not function for any routes writter before or above it, it will only function for the routes written after it
+// app.use(loggingMiddleware, (req, res, next) => {
+//     console.log("Finished Logging");
+//     next();
+// });
 
 // Post Request to add a new user ( without validation )
 app.post("/api/users", (req, res) => {
@@ -72,79 +99,39 @@ app.post("/api/users", (req, res) => {
   res.status(201).send(newUser);
 });
 
+// Route Parameters for users (Shows a specific user by id)
+app.get("/api/users/:id", resolveUserById, (req, res) => {
+  const { findUserIndex } = req;
+  const user = users[findUserIndex];
+  if (!user) {
+    return res.status(404).send({ msg: "User not found" });
+  }
+
+  res.status(200).send(user);
+});
+
 // Get Requests for /api/products route (Shows All Products)
 app.get("/api/products", (req, res) => {
   res.status(200).send(products);
 });
 
 // Put Request to update the entire user, it changes all the properties of the user sent in the request body
-app.put("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
-
-  const parseId = parseInt(id);
-  if (isNaN(parseId)) {
-    // Invalid Id Case
-    return res.status(400).send({ msg: "Invalid id" });
-  }
-
-  const findUserIndex = users.findIndex((user) => user.id === parseId);
-
-  if (findUserIndex === -1) {
-    // User Not Found Case
-    return res.status(404).send({ msg: "User not found" });
-  }
-
-  users[findUserIndex] = { id: parseId, ...body };
+app.put("/api/users/:id", resolveUserById, (req, res) => {
+  const { body, findUserIndex } = req;
+  users[findUserIndex] = { id: users[findUserIndex].id, ...body };
   return res.sendStatus(200);
 });
 
 // Patch Request to update a part of user which is sent in the requst body
 app.patch("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
-
-  const parseId = parseInt(id);
-  if (isNaN(parseId)) {
-    // Invalid Id Case
-    return res.status(400).send({ msg: "Invalid id" });
-  }
-
-  const findUserIndex = users.findIndex((user) => user.id === parseId);
-
-  if (findUserIndex === -1) {
-    // User Not Found Case
-    res.status(404).send({ msg: "User Not Found" });
-  }
-
+  const { body, findUserIndex } = req;
   users[findUserIndex] = { ...users[findUserIndex], ...body };
   return res.sendStatus(200);
 });
 
 // Delete Request to delete any user
 app.delete("/api/users/:id", (req, res) => {
-
-  const {
-    params: { id },
-  } = req;
-
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) {
-    // Invalid Id Case
-    return res.status(400).send({ msg: "Invalid id" });
-  }
-
-  const findUserIndex = users.findIndex((user) => user.id === parsedId);
-
-  if (findUserIndex === -1) {
-    // User Not Fount Case
-    return res.status(404).send({ msg: "User Not Found" });
-  }
-
+  const { findUserIndex } = req;
   // Delete the user from the array
   users.splice(findUserIndex);
   return res.sendStatus(200);
