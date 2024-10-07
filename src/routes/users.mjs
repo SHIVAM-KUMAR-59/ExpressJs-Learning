@@ -9,6 +9,7 @@ import { users } from "../utils/constants.mjs";
 import { createUserValidationSchema } from "../utils/validationSchemas.mjs";
 import { resolveIndexByUserId } from "../utils/middlewares.mjs";
 import { User } from "../mongoose/schemas/user.mjs";
+import { hashPassword } from "../utils/helpers.mjs";
 
 const router = Router();
 
@@ -71,7 +72,8 @@ router.post(
     }
 
     const data = matchedData(req); // Extracts validated data from the request body
-
+    data.password = hashPassword(data.password); // Hash the password
+    console.log(data);
     const newUser = new User(data); // Create a User instance
     try {
       const savedUser = await newUser.save(); // Save the user in the database

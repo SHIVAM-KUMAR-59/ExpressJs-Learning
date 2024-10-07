@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
 import { User } from "../mongoose/schemas/user.mjs";
+import { comparePassword } from "../utils/helpers.mjs";
 
 // Takes the validated user and stores it into session data
 passport.serializeUser((user, done) => {
@@ -29,17 +30,21 @@ passport.deserializeUser(async (id, done) => {
 
 // Main validation function
 export default passport.use(
-  new Strategy(async (username, password, done) => {
+  new Strategy({ usernameField: "name" }, async (name, password, done) => {
     try {
-      const findUser = await User.findOne({ name: username });
+      const findUser = await User.findOne({ name });
+      console.log(findUser);
 
+      // If user is not present
       if (!findUser) {
         throw new Error("User Not Found!");
       }
 
-      if (findUser.password !== password) {
+      // if the password is not equal to the hashed password in databse
+      if (!comparePassword(password, findUser.password)) {
         throw new Error("Invalid Password!");
       }
+
       done(null, findUser);
     } catch (err) {
       // Send the error
