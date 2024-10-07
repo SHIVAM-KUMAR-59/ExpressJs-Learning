@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
 import mongoose from "mongoose";
+import MongoStore from "connect-mongo";
 import "./Stratergies/local-stratergy.mjs";
 
 const app = express();
@@ -15,6 +16,7 @@ mongoose // Connect to the databse
 app.use(express.json()); // Middleware to parse JSON body
 app.use(cookieParser("HelloWorld")); // Parsing cookies
 app.use(
+  // Using sessions
   session({
     secret: "shivam",
     saveUninitialized: false, // Save uninitialized sessions to the store
@@ -22,8 +24,12 @@ app.use(
     cookie: {
       maxAge: 60000 * 60, // 1 hour, after this the cookie will expire
     },
+    // Store the session Info
+    store: MongoStore.create({
+      client: mongoose.connection.getClient(),
+    }),
   })
-); // Using sessions
+);
 
 app.use(passport.initialize()); // Using passport.js library
 app.use(passport.session());
