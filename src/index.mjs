@@ -5,7 +5,8 @@ import session from "express-session";
 import passport from "passport";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo";
-import "./Stratergies/local-stratergy.mjs";
+import "./Stratergies/discord-stratergy.mjs";
+// import "./Stratergies/local-stratergy.mjs";
 
 const app = express();
 mongoose // Connect to the databse
@@ -79,3 +80,16 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// CLIENT_SECRET = gxQxl6XDvh7BUshUI9AG7s49KpGk0Z1G
+// CLIENT_ID = 1292854304180277359
+app.get("/api/auth/discord", passport.authenticate("discord"));
+app.get(
+  "/api/auth/discord/redirect",
+  passport.authenticate("discord"),
+  (req, res) => {
+    console.log(req.session);
+    console.log(req.user);
+    res.sendStatus(200);
+  }
+);
