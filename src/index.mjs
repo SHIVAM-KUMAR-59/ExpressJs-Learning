@@ -3,6 +3,8 @@ import routes from "./routes/index.mjs";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { users } from "./utils/constants.mjs";
+import passport from "passport";
+import "./Stratergies/local-stratergy.mjs";
 
 const app = express();
 
@@ -18,7 +20,39 @@ app.use(
     },
   })
 ); // Using sessions
+
+app.use(passport.initialize()); // Using passport.js library
+app.use(passport.session());
+
 app.use(routes); // Using all the routes
+
+// Authenticate user route
+app.post("/api/auth", passport.authenticate("local"), (req, res) => {
+  return res.sendStatus(200);
+});
+
+// Get the authentication status of user route
+app.get("/api/auth/status", (req, res) => {
+  console.log("Inside /api/auth/status endpoint");
+  console.log(req.user);
+  console.log(req.session);
+  return req.user ? res.send(req.user) : res.sendStatus(401);
+});
+
+// Logout route
+app.post("/api/auth/logout", (req, res) => {
+  if (!req.user) {
+    return res.sendStatus(401);
+  } else {
+    req.logout((err) => {
+      if (err) {
+        res.sendStatus(400);
+      } else {
+        res.sendStatus(200);
+      }
+    });
+  }
+});
 
 const PORT = process.env.PORT || 3000; // Declaring the port
 
@@ -29,72 +63,6 @@ app.get("/", (req, res) => {
   req.session.visited = true;
   res.cookie("Hello", "World", { maxAge: 30000, signed: true });
   res.status(200).send({ msg: "Hello World" });
-});
-
-// Path to authenticate user
-app.post("/api/auth", (req, res) => {
-  // Assuming the payload is correct
-  const {
-    body: { name, password },
-  } = req;
-
-  const findUser = users.find((user) => user.name === name);
-
-  // User Not Found
-  if (!findUser) {
-    return res.status(401).send({ msg: "User Not Found" });
-  }
-
-  // Incorrect Password
-  if (findUser.password !== password) {
-    return res.status(401).send({ msg: "Incorrect Password" });
-  }
-
-  req.session.user = findUser; // Mapping the user to the session
-  return res.status(200).send(findUser);
-});
-
-// Get the authentication status of the user
-app.get("/api/auth/status", (req, res) => {
-  req.sessionStore.get(req.sessionId, (err, session) => {
-    if (err) {
-      console.log(err);
-      throw err;
-    } else {
-      console.log(session);
-    }
-  });
-  return req.session.user
-    ? res.status(200).send(req.session.user)
-    : res.status(401).send({ msg: "Not Authenticated" });
-});
-
-// Route to add item to the cart
-app.post("/api/cart", (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).send({ msg: "Unauthorized" });
-  }
-
-  const { body: item } = req;
-  const { cart } = req.session;
-  if (cart) {
-    // Cart is defined, push the item into it
-    cart.push(item);
-  } else {
-    // Cart is not defined, then define it
-    req.session.cart = [item];
-  }
-
-  return res.status(201).send(item);
-});
-
-// Get items from the cart
-app.get("/api/cart", (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).send({ msg: "Unauthorized" });
-  }
-
-  return res.send(req.session.cart ?? []);
 });
 
 // Listening on the server
