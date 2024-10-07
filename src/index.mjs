@@ -2,11 +2,15 @@ import express from "express"; // Importing express
 import routes from "./routes/index.mjs";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import { users } from "./utils/constants.mjs";
 import passport from "passport";
+import mongoose from "mongoose";
 import "./Stratergies/local-stratergy.mjs";
 
 const app = express();
+mongoose // Connect to the databse
+  .connect("mongodb://localhost:27017/express_learning")
+  .then(() => console.log("Connected to Database"))
+  .catch((err) => console.log(err));
 
 app.use(express.json()); // Middleware to parse JSON body
 app.use(cookieParser("HelloWorld")); // Parsing cookies

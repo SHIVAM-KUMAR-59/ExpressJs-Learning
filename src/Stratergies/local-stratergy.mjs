@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { users } from "../utils/constants.mjs";
+import { User } from "../mongoose/schemas/user.mjs";
 
 // Takes the validated user and stores it into session data
 passport.serializeUser((user, done) => {
@@ -10,11 +10,11 @@ passport.serializeUser((user, done) => {
 });
 
 // Registers a function used to deserialize user objects out of the session.
-passport.deserializeUser((id, done) => {
+passport.deserializeUser(async (id, done) => {
   console.log("Inside Deserialize User Function");
   console.log(`Deserializing user with Id: ${id}`);
   try {
-    const findUser = users.find((user) => user.id === id); // Search for user
+    const findUser = await User.findById(id); // Search for user
 
     if (!findUser) {
       // Not found then throw error
@@ -29,20 +29,17 @@ passport.deserializeUser((id, done) => {
 
 // Main validation function
 export default passport.use(
-  new Strategy({ usernameField: "name" }, (username, password, done) => {
-    console.log(`Username: ${username}`);
-    console.log(`Password: ${password}`);
+  new Strategy(async (username, password, done) => {
     try {
-      const findUser = users.find((user) => user.name === username);
-      // User not found
+      const findUser = await User.findOne({ name: username });
+
       if (!findUser) {
-        throw new Error("User Not Found");
+        throw new Error("User Not Found!");
       }
-      // User found but password does not match
+
       if (findUser.password !== password) {
-        throw new Error("Invalid Credentials");
+        throw new Error("Invalid Password!");
       }
-      // User validated then send it
       done(null, findUser);
     } catch (err) {
       // Send the error
