@@ -42,6 +42,33 @@ This repository is structured to showcase the different features and functionali
    npm run start:dev
    ```
 
+## Packages Used
+
+This project uses the following packages:
+
+1. **[bcrypt](https://www.npmjs.com/package/bcrypt)**: A library for hashing passwords.
+2. **[connect-mongo](https://www.npmjs.com/package/connect-mongo)**: MongoDB session store for Express and Connect.
+3. **[cookie-parser](https://www.npmjs.com/package/cookie-parser)**: Middleware for parsing cookies in Express.
+4. **[express](https://www.npmjs.com/package/express)**: A web application framework for Node.js.
+5. **[express-session](https://www.npmjs.com/package/express-session)**: Middleware for managing sessions in Express.
+6. **[express-validator](https://www.npmjs.com/package/express-validator)**: Middleware for validating and sanitizing request data in Express.
+7. **[mongoose](https://www.npmjs.com/package/mongoose)**: An ODM (Object Data Modeling) library for MongoDB and Node.js.
+8. **[passport](https://www.npmjs.com/package/passport)**: Middleware for authentication in Node.js.
+9. **[passport-discord](https://www.npmjs.com/package/passport-discord)**: A Discord authentication strategy for Passport.
+10. **[passport-local](https://www.npmjs.com/package/passport-local)**: A local authentication strategy for Passport.
+
+## DevDependencies
+
+This project uses the following development dependencies:
+
+1. **[@babel/core](https://www.npmjs.com/package/@babel/core)**: Babel compiler core.
+2. **[@babel/node](https://www.npmjs.com/package/@babel/node)**: CLI for Babel, allowing you to run Node.js scripts with Babel.
+3. **[@babel/preset-env](https://www.npmjs.com/package/@babel/preset-env)**: A Babel preset for compiling ES6+ down to ES5.
+4. **[@types/jest](https://www.npmjs.com/package/@types/jest)**: TypeScript definitions for Jest (for TypeScript support).
+5. **[jest](https://www.npmjs.com/package/jest)**: A JavaScript testing framework.
+6. **[nodemon](https://www.npmjs.com/package/nodemon)**: A tool that helps develop Node.js applications by automatically restarting the server when file changes are detected.
+7. **[supertest](https://www.npmjs.com/package/supertest)**: A library for testing HTTP servers in Node.js.
+
 ## Contributions ✨
 
 This repository is intended for personal learning, but if you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request!
