@@ -10,6 +10,7 @@ import { createUserValidationSchema } from "../utils/validationSchemas.mjs";
 import { resolveIndexByUserId } from "../utils/middlewares.mjs";
 import { User } from "../mongoose/schemas/user.mjs";
 import { hashPassword } from "../utils/helpers.mjs";
+import { createUserHandler, getUserByIdHandler } from "../handlers/users.mjs";
 
 const router = Router();
 
@@ -48,41 +49,13 @@ router.get(
 );
 
 // Route Parameters for users (Shows a specific user by id)
-router.get("/api/users/:id", resolveIndexByUserId, (req, res) => {
-  const { findUserIndex } = req;
-  const user = users[findUserIndex];
-  if (!user) {
-    return res.status(404).send({ msg: "User not found" });
-  }
-
-  res.status(200).send(user);
-});
+router.get("/api/users/:id", resolveIndexByUserId, getUserByIdHandler);
 
 // Post Request to add a new user validated using body() function from express-validator
 router.post(
   "/api/users",
   checkSchema(createUserValidationSchema),
-  async (req, res) => {
-    const result = validationResult(req);
-
-    if (!result.isEmpty()) {
-      // If there are errors, return the errors
-      return res.status(400).send({ errors: result.array() });
-    }
-
-    const data = matchedData(req); // Extracts validated data from the request body
-    data.password = hashPassword(data.password); // Hash the password
-    console.log(data);
-    const newUser = new User(data); // Create a User instance
-    try {
-      const savedUser = await newUser.save(); // Save the user in the database
-      return res.status(201).send(savedUser);
-    } catch (error) {
-      // Log any errors present
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  }
+  createUserHandler
 );
 
 // Put Request to update the entire user, it changes all the properties of the user sent in the request body
