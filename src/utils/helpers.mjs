@@ -6,7 +6,7 @@ const saltRounds = 10;
 export const hashPassword = (password) => {
   // Generate the salt
   const salt = bcrypt.genSaltSync(saltRounds);
-  console.log(salt);
+  // console.log(salt);
   // Hash the password
   return bcrypt.hashSync(password, salt);
 };
