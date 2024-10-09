@@ -73,6 +73,28 @@ This project uses the following development dependencies:
 
 This repository is intended for personal learning, but if you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request!
 
+1. Fork the repository.
+
+2. Create a new branch for your feature:
+
+   ```bash
+   git checkout -b feature/YourFeature
+   ```
+
+3. Commit your changes:
+
+   ```bash
+   git commit -m 'Add some feature'
+   ```
+
+4. Push to the branch:
+
+   ```bash
+   git push origin feature/YourFeature
+   ```
+
+5. Open a pull request, and I'll review your contribution!
+
 ## Acknowledgments 👏
 
 A huge thank you to the Express.js community and various online resources that have been invaluable in my learning journey!
